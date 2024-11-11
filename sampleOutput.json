@@ -1,0 +1,58 @@
+{
+    "status": "ok",
+    "totalResults": 4,
+    "articles": [
+        {
+            "source": {
+                "id": "reuters",
+                "name": "Reuters"
+            },
+            "author": null,
+            "title": "EU states approve world's first comprehensive crypto rules",
+            "description": "European Union states on Tuesday gave the final nod to the world's first comprehensive set of rules to regulate cryptoassets on Tuesday, piling pressure on countries such as Britain and the United States to play catch up.",
+            "url": "https://www.reuters.com/technology/eu-states-approve-worlds-first-comprehensive-crypto-rules-2023-05-16/",
+            "urlToImage": "https://www.reuters.com/resizer/osT0UXOZpv5n5wDnqLY2oqhLFkA=/1200x628/smart/filters:quality(80)/cloudfront-us-east-2.images.arcpublishing.com/reuters/NQZBLEKYINIZNKMH64XXMQVLFE.jpg",
+            "publishedAt": "2023-05-16T09:50:48Z",
+            "content": "May 16 (Reuters) - European Union states on Tuesday gave the final nod to the world's first comprehensive set of rules to regulate cryptoassets on Tuesday, piling pressure on countries such as Britai… [+1699 chars]"
+        },
+        {
+            "source": {
+                "id": "reuters",
+                "name": "Reuters"
+            },
+            "author": null,
+            "title": "Cryptoverse: Every frog has its day as pepe pops 7,000%",
+            "description": "Move over dogecoin?",
+            "url": "https://www.reuters.com/technology/cryptoverse-every-frog-has-its-day-pepe-pops-7000-2023-05-16/",
+            "urlToImage": "https://www.reuters.com/resizer/bDpEZLCvyjTXJmk7ZVT3SMnEc5k=/1200x628/smart/filters:quality(80)/cloudfront-us-east-2.images.arcpublishing.com/reuters/BIHDARQPJNMFXMYLJMTQ56SM2E.jpg",
+            "publishedAt": "2023-05-16T06:16:46Z",
+            "content": "May 16 (Reuters) - Move over dogecoin?\r\n\"Memecoins\" - a hyper-speculative, ultra-volatile and somewhat peculiar class of crypto - are back in the spotlight after the latest digital token hit the mark… [+4157 chars]"
+        },
+        {
+            "source": {
+                "id": "next-big-future",
+                "name": "Next Big Future"
+            },
+            "author": "Brian Wang",
+            "title": "Vast Has Big Orbital Space Station Plans and is Backed by Crypto Billionaire | NextBigFuture.com",
+            "description": "By 2025, Space Startup Vast plans to launch its first space station module. Vast, a pioneer in space habitation technologies, plans to launch the world’s",
+            "url": "https://www.nextbigfuture.com/2023/05/vast-has-big-orbital-space-station-plans.html",
+            "urlToImage": "https://nextbigfuture.s3.amazonaws.com/uploads/2023/05/Screen-Shot-2023-05-15-at-9.48.46-AM.jpg",
+            "publishedAt": "2023-05-15T17:02:25Z",
+            "content": "By 2025, Space Startup Vast plans to launch its first space station module. Vast, a pioneer in space habitation technologies, plans to launch the worlds first commercial space station, called Haven-1… [+3388 chars]"
+        },
+        {
+            "source": {
+                "id": "the-globe-and-mail",
+                "name": "The Globe And Mail"
+            },
+            "author": "Unknown",
+            "title": "Panic at the crypto",
+            "description": "Cryptocurrencies have taken another beating this week. Globe columnist Tim Kiladze makes sense of this latest crash",
+            "url": "https://www.theglobeandmail.com/podcasts/the-decibel/article-panic-at-the-crypto/",
+            "urlToImage": "https://www.theglobeandmail.com/resizer/_avQSW-gNb8XMlBIpkC-PJlBCCk=/1200x800/filters:quality(80)/cloudfront-us-east-1.images.arcpublishing.com/tgam/GHQ5WM2SKJDSDH53LMIWUHHUSA.png",
+            "publishedAt": "2022-06-16T09:00:00Z",
+            "content": "Cryptocurrencies have taken another dive this week. And this crash follows seven months of declines, even for the big names in the game. Bitcoin, for example, is down more than 60 per cent from its p… [+339 chars]"
+        }
+    ]
+}
