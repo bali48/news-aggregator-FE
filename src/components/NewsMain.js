@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-
 import NewsItem from "./NewsItem";
 import Spinner from "./Spinner";
 import PropTypes from "prop-types";
 import InfiniteScroll from "react-infinite-scroll-component";
 import NewsHeader from "./NewsHeader";
+import { get } from "../services/axiosService";
+import { apiEndPoints } from "../Constants/urls";
+import { useSearch } from "../context/filterContext";
 
 const News = (props) => {
   const [articles, setArticles] = useState([]);
@@ -13,38 +15,58 @@ const News = (props) => {
   const [totalArticles, setTotalArticles] = useState(0);
   const [firstArticle, setFirstArticle] = useState([]);
 
+  const { searchTerm } = useSearch();
   const capitalize = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
 
   const updateNews = async () => {
     props.setProgress(10);
-    const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${props.apiKey}&page=${page}&
-        pagesize=${props.pageSize}`;
     setLoading(true);
-    let data = await fetch(url);
+    const params = {
+      category: props.category,
+      pageSize: props.pageSize,
+      page: props.page,
+    };
+    const { newsapi,guardianapi,newYarkApiUrl } = await get(apiEndPoints.USERARTICALS, params);
     props.setProgress(30);
-    let parsedData = await data.json();
-    props.setProgress(70);
-    setFirstArticle(parsedData.articles);
-    setArticles(parsedData.articles);
-    setTotalArticles(parsedData.totalResults);
+    const allArticles = [
+      ...newsapi.articles,
+      ...guardianapi.response.results.map(article => ({
+        source: {
+          id: "guardian",
+          name: "The Guardian"
+        },
+        author: article.fields?.byline || "Unknown",
+        title: article.fields?.headline,
+        description: article.fields?.standfirst || article?.fields?.trailText,
+        url: article.webUrl,
+        urlToImage: article.fields?.thumbnail || "",
+        publishedAt: article.webPublicationDate,
+        content: article.fields?.main || "No content available"
+      })),
+      ...newYarkApiUrl.results.map(article => ({
+        source: {
+          id: "nytimes",
+          name: "The New York Times"
+        },
+        author: article.byline || "Unknown",
+        title: article.title,
+        description: article.abstract,
+        url: article.url,
+        urlToImage: article.multimedia && article.multimedia.length > 0 ? article.multimedia[0].url : "",
+        publishedAt: article.published_date,
+        content: article.source || "No content available"
+      }))
+    ];
+        
+      props.setProgress(70);
+    setFirstArticle(allArticles);
+    setArticles(allArticles);
+    setTotalArticles(allArticles.length);
     setLoading(false);
     props.setProgress(100);
   };
-  //   const updateNews = async () => {
-  //     props.setProgress(10);
-  //     setLoading(true);
-  //     props.setProgress(30);
-  //     const parsedData = await fetchNews();
-  //     console.log("parse", parsedData);
-  //     props.setProgress(70);
-  //     // setFirstArticle(parsedData.articles);
-  //     // setArticles([]);
-  //     // setTotalArticles(parsedData.totalResults);
-  //     setLoading(false);
-  //     props.setProgress(100);
-  //   };
 
   useEffect(() => {
     document.title = `NewsHub - ${capitalize(props.category)}`;
@@ -52,237 +74,113 @@ const News = (props) => {
   }, []);
 
   const fetchMoreData = async () => {
-    const url = `https://newsapi.org/v2/top-headlines?country=${
-      props.country
-    }&category=${props.category}&apiKey=${props.apiKey}&page=${page + 1}
-        &pagesize=${props.pageSize}`;
     setPage(page + 1);
     setLoading(true);
-    let data = await fetch(url);
-    let parsedData = await data.json();
-    console.log("parsedData", parsedData);
+    const params = {
+      category: props.category,
+      pageSize: props.pageSize,
+      page: props.page,
+    };
+
+    const { newsapi } = await get(apiEndPoints.USERARTICALS, params);
+    let parsedData = await newsapi;
     setArticles(articles.concat(parsedData.articles));
     setTotalArticles(parsedData.totalResults);
     setLoading(false);
   };
 
+  // Filter articles based on the search term
+  const filteredArticles = articles.filter((article) =>
+    article.title?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+    (article.description && article.description?.toLowerCase().includes(searchTerm?.toLowerCase()))
+  );
+
   return (
     <>
-      <h1 className='text-center' style={{ margin: "35px 0px" }}>
+      <h1 className="text-center" style={{ margin: "35px 0px" }}>
         NewsHub - Top {capitalize(props.category)} headlines
       </h1>
       {loading && <Spinner />}
       <InfiniteScroll
-        dataLength={articles.length}
+        dataLength={filteredArticles.length}
         next={fetchMoreData}
-        hasMore={articles.length !== totalArticles}
-        loader={loading && <Spinner></Spinner>}
+        hasMore={filteredArticles.length !== totalArticles}
+        loader={loading && <Spinner />}
       >
-        <div className='container'>
-          <div className='row'>
-            <div className='row'>
-              <div className='col-sm-8'>
-                {firstArticle.map((element, i) => {
-                  if (i === 0) {
-                    return (
-                      <NewsHeader
-                        item={0}
-                        key={element.url}
-                        title={
-                          element.title
-                            ? element.title.length > 50
-                              ? (element.title =
-                                  element.title.slice(0, 50) + "...")
-                              : element.title
-                            : ""
-                        }
-                        description={
-                          element.description
-                            ? element.description.length > 100
-                              ? (element.description =
-                                  element.description.slice(0, 100) + "...")
-                              : element.description
-                            : ""
-                        }
-                        imageUrl={element.urlToImage}
-                        newsUrl={element.url}
-                        publishedAt={element.publishedAt}
-                        author={element.author ? element.author : "unknown"}
-                        source={element.source.name}
-                      ></NewsHeader>
-                    );
-                  }
-                })}
-              </div>
-              <div className='col-sm-4'>
-                <div className='row'>
-                  <div className='col'>
-                    {firstArticle.map((element, i) => {
-                      if (i === 1) {
-                        return (
-                          <NewsItem
-                            mainItem={true}
-                            key={element.url}
-                            title={
-                              element.title
-                                ? element.title.length > 50
-                                  ? (element.title =
-                                      element.title.slice(0, 50) + "...")
-                                  : element.title
-                                : ""
-                            }
-                            description={
-                              element.description
-                                ? element.description.length > 100
-                                  ? (element.description =
-                                      element.description.slice(0, 100) + "...")
-                                  : element.description
-                                : ""
-                            }
-                            imageUrl={element.urlToImage}
-                            newsUrl={element.url}
-                            publishedAt={element.publishedAt}
-                            author={element.author ? element.author : "unknown"}
-                            source={element.source.name}
-                          ></NewsItem>
-                        );
-                      }
-                    })}
-                  </div>
-                  <div className='col'>
-                    {firstArticle.map((element, i) => {
-                      if (i === 2) {
-                        return (
-                          <NewsItem
-                            mainItem={true}
-                            key={element.url}
-                            title={
-                              element.title
-                                ? element.title.length > 50
-                                  ? (element.title =
-                                      element.title.slice(0, 50) + "...")
-                                  : element.title
-                                : ""
-                            }
-                            description={
-                              element.description
-                                ? element.description.length > 100
-                                  ? (element.description =
-                                      element.description.slice(0, 100) + "...")
-                                  : element.description
-                                : ""
-                            }
-                            imageUrl={element.urlToImage}
-                            newsUrl={element.url}
-                            publishedAt={element.publishedAt}
-                            author={element.author ? element.author : "unknown"}
-                            source={element.source.name}
-                          ></NewsItem>
-                        );
-                      }
-                    })}
-                  </div>
-                </div>
-
-                <div className='row'>
-                  <div className='col'>
-                    {firstArticle.map((element, i) => {
-                      if (i === 3) {
-                        return (
-                          <NewsItem
-                            mainItem={true}
-                            key={element.url}
-                            title={
-                              element.title
-                                ? element.title.length > 50
-                                  ? (element.title =
-                                      element.title.slice(0, 50) + "...")
-                                  : element.title
-                                : ""
-                            }
-                            description={
-                              element.description
-                                ? element.description.length > 100
-                                  ? (element.description =
-                                      element.description.slice(0, 100) + "...")
-                                  : element.description
-                                : ""
-                            }
-                            imageUrl={element.urlToImage}
-                            newsUrl={element.url}
-                            publishedAt={element.publishedAt}
-                            author={element.author ? element.author : "unknown"}
-                            source={element.source.name}
-                          ></NewsItem>
-                        );
-                      }
-                    })}
-                  </div>
-                  <div className='col'>
-                    {firstArticle.map((element, i) => {
-                      if (i === 4) {
-                        return (
-                          <NewsItem
-                            mainItem={true}
-                            key={element.url}
-                            title={
-                              element.title
-                                ? element.title.length > 50
-                                  ? (element.title =
-                                      element.title.slice(0, 50) + "...")
-                                  : element.title
-                                : ""
-                            }
-                            description={
-                              element.description
-                                ? element.description.length > 100
-                                  ? (element.description =
-                                      element.description.slice(0, 100) + "...")
-                                  : element.description
-                                : ""
-                            }
-                            imageUrl={element.urlToImage}
-                            newsUrl={element.url}
-                            publishedAt={element.publishedAt}
-                            author={element.author ? element.author : "unknown"}
-                            source={element.source.name}
-                          ></NewsItem>
-                        );
-                      }
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {articles.slice(5).map((element) => {
-              return (
-                <div className='col-md-4' key={element.url}>
-                  <NewsItem
+        <div className="container">
+          <div className="row">
+            <div className="row">
+              <div className="col-sm-8">
+                {filteredArticles.slice(0, 1).map((element,index) => (
+                  <NewsHeader
+                    key={index}
+                    item={0}
                     title={
-                      element.title
-                        ? element.title.length > 50
-                          ? (element.title = element.title.slice(0, 50) + "...")
-                          : element.title
-                        : ""
+                      element.title.length > 50
+                        ? element.title.slice(0, 50) + "..."
+                        : element.title
                     }
                     description={
-                      element.description
-                        ? element.description.length > 100
-                          ? (element.description =
-                              element.description.slice(0, 100) + "...")
-                          : element.description
-                        : ""
+                      element.description && element.description.length > 100
+                        ? element.description.slice(0, 100) + "..."
+                        : element.description
                     }
                     imageUrl={element.urlToImage}
                     newsUrl={element.url}
                     publishedAt={element.publishedAt}
-                    author={element.author ? element.author : "unknown"}
+                    author={element.author || "unknown"}
                     source={element.source.name}
-                  ></NewsItem>
+                  />
+                ))}
+              </div>
+              <div className="col-sm-4">
+                <div className="row">
+                  {filteredArticles.slice(1, 5).map((element) => (
+                    <div className="col" key={element.url}>
+                      <NewsItem
+                        mainItem
+                        title={
+                          element.title.length > 50
+                            ? element.title.slice(0, 50) + "..."
+                            : element.title
+                        }
+                        description={
+                          element.description && element.description.length > 100
+                            ? element.description.slice(0, 100) + "..."
+                            : element.description
+                        }
+                        imageUrl={element.urlToImage}
+                        newsUrl={element.url}
+                        publishedAt={element.publishedAt}
+                        author={element.author || "unknown"}
+                        source={element.source.name}
+                      />
+                    </div>
+                  ))}
                 </div>
-              );
-            })}
+              </div>
+            </div>
+            {filteredArticles.slice(5).map((element) => (
+              <div className="col-md-4" key={element.url}>
+                <NewsItem
+                  title={
+                    element.title.length > 50
+                      ? element.title.slice(0, 50) + "..."
+                      : element.title
+                  }
+                  description={
+                    element.description && element.description.length > 100
+                      ? element.description.slice(0, 100) + "..."
+                      : element.description
+                  }
+                  imageUrl={element.urlToImage}
+                  newsUrl={element.url}
+                  publishedAt={element.publishedAt}
+                  author={element.author || "unknown"}
+                  source={element.source.name}
+                />
+              </div>
+            ))}
           </div>
         </div>
       </InfiniteScroll>
